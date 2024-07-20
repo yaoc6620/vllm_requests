@@ -69,6 +69,9 @@ class LLMEngine:
         distributed_init_method: str,
         placement_group: Optional["PlacementGroup"],
         log_stats: bool,
+        #requestparallel
+        # num_engine:int
+        # num_schedules: int = 2,
     ) -> None:
         logger.info(
             "Initializing an LLM engine with config: "
@@ -114,6 +117,7 @@ class LLMEngine:
 
         # Create the scheduler.
         self.scheduler = Scheduler(scheduler_config, cache_config)
+       
 
         # Logging.
         self.last_logging_time = 0.0
@@ -236,7 +240,9 @@ class LLMEngine:
         # Warm up the model. This includes capturing the model into CUDA graph
         # if enforce_eager is False.
         self._run_workers("warm_up_model")
+    
 
+    #requestparallel
     @classmethod
     def from_engine_args(cls, engine_args: EngineArgs) -> "LLMEngine":
         """Creates an LLM engine from the engine arguments."""
@@ -247,10 +253,11 @@ class LLMEngine:
         distributed_init_method, placement_group = initialize_cluster(
             parallel_config)
         # Create the LLM engine.
+        #requestparallel
         engine = cls(*engine_configs,
-                     distributed_init_method,
-                     placement_group,
-                     log_stats=not engine_args.disable_log_stats)
+                        distributed_init_method,
+                        placement_group,
+                        log_stats=not engine_args.disable_log_stats)
         return engine
 
     def add_request(

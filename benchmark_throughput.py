@@ -27,7 +27,7 @@ def sample_requests(
     dataset = [data for data in dataset if len(data["conversations"]) >= 2]
     # Only keep the first two turns of each conversation.
     dataset = [(data["conversations"][0]["value"],
-                data["conversations"][1]["value"]) for data in dataset]
+                data["conversations"][1]["value"]) for data in dataset[:5000]]
 
     # Tokenize the prompts and completions.
     prompts = [prompt for prompt, _ in dataset]

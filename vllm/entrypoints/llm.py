@@ -82,6 +82,8 @@ class LLM:
         enforce_eager: bool = False,
         max_context_len_to_capture: int = 8192,
         **kwargs,
+
+        # num_engines: int = 1, # 改了
     ) -> None:
         if "disable_log_stats" not in kwargs:
             kwargs["disable_log_stats"] = True
@@ -102,18 +104,20 @@ class LLM:
             max_context_len_to_capture=max_context_len_to_capture,
             **kwargs,
         )
+        #requestparallel
         self.llm_engine = LLMEngine.from_engine_args(engine_args)
         self.request_counter = Counter()
+        # self.request_counter = iter(cycle(range(1000000))) #改了
 
     def get_tokenizer(
             self) -> Union[PreTrainedTokenizer, PreTrainedTokenizerFast]:
-        return self.llm_engine.tokenizer
+        return self.llm_engine.tokenizer 
 
     def set_tokenizer(
         self,
         tokenizer: Union[PreTrainedTokenizer, PreTrainedTokenizerFast],
     ) -> None:
-        self.llm_engine.tokenizer = tokenizer
+        self.llm_engine.tokenizer = tokenizer 
 
     def generate(
         self,
@@ -170,9 +174,14 @@ class LLM:
         sampling_params: SamplingParams,
         prompt_token_ids: Optional[List[int]],
     ) -> None:
+        
         request_id = str(next(self.request_counter))
+        #改动
+        #engine_index = hash(request_id) % self.num_engines
+        #selected_engine = self.llm_engines[engine_index]
         self.llm_engine.add_request(request_id, prompt, sampling_params,
                                     prompt_token_ids)
+        #selected_engine.add_request(request_id, prompt, sampling_params, prompt_token_ids)
 
     def _run_engine(self, use_tqdm: bool) -> List[RequestOutput]:
         # Initialize tqdm.
