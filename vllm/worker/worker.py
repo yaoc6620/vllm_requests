@@ -13,8 +13,7 @@ from vllm.model_executor.parallel_utils.parallel_state import (
 from vllm.sequence import SamplerOutput, SequenceGroupMetadata
 from vllm.worker.cache_engine import CacheEngine
 from vllm.worker.model_runner import ModelRunner
-
-
+import ray
 class Worker:
     """A worker class that executes (a partition of) the model on a GPU.
 
@@ -30,12 +29,14 @@ class Worker:
         scheduler_config: SchedulerConfig,
         rank: Optional[int] = None,
         distributed_init_method: Optional[str] = None,
+        num_parallel_requests: int = 1,
     ) -> None:
         self.model_config = model_config
         self.parallel_config = parallel_config
         self.scheduler_config = scheduler_config
         self.rank = rank
         self.distributed_init_method = distributed_init_method
+        self.num_parallel_requests = num_parallel_requests 
 
         self.model_runner = ModelRunner(model_config, parallel_config,
                                         scheduler_config)
@@ -65,12 +66,13 @@ class Worker:
         if self.rank < 0:
             raise ValueError("Invalid or unspecified rank.")
         torch.cuda.set_device(self.device)
-
+        #print(f"Worker {self.rank} using device {self.device}") 
         _check_if_gpu_supports_dtype(self.model_config.dtype)
 
         # Initialize the distributed environment.
+
         _init_distributed_environment(self.parallel_config, self.rank,
-                                      self.distributed_init_method)
+                                        self.distributed_init_method, self.num_parallel_requests)
 
         # Initialize the model.
         set_random_seed(self.model_config.seed)
@@ -155,7 +157,8 @@ class Worker:
         # If there is no input, we don't need to execute the model.
         if not seq_group_metadata_list:
             return {}
-
+        #if(self.rank == 2):
+            #print(f"Worker {self.rank} using device {self.device}") 
         output = self.model_runner.execute_model(seq_group_metadata_list,
                                                  self.gpu_cache)
         return output
@@ -165,11 +168,13 @@ def _init_distributed_environment(
     parallel_config: ParallelConfig,
     rank: int,
     distributed_init_method: Optional[str] = None,
+    num_parallel_requests: int = 1,
+
 ) -> None:
     """Initialize the distributed environment."""
     if torch.distributed.is_initialized():
         torch_world_size = torch.distributed.get_world_size()
-        if torch_world_size != parallel_config.world_size:
+        if torch_world_size != parallel_config.world_size: #改了
             raise RuntimeError(
                 "torch.distributed is already initialized but the torch world "
                 "size does not match parallel_config.world_size "
@@ -188,8 +193,9 @@ def _init_distributed_environment(
 
     # A small all_reduce for warmup.
     torch.distributed.all_reduce(torch.zeros(1).cuda())
+    #修改
     initialize_model_parallel(parallel_config.tensor_parallel_size,
-                              parallel_config.pipeline_parallel_size)
+                             parallel_config.pipeline_parallel_size, num_parallel_requests)
 
 
 def _check_if_gpu_supports_dtype(torch_dtype: torch.dtype):

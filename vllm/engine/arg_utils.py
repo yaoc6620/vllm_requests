@@ -15,7 +15,7 @@ class EngineArgs:
     tokenizer_mode: str = 'auto'
     trust_remote_code: bool = False
     download_dir: Optional[str] = None
-    load_format: str = 'auto'
+    load_format: str = 'auto'          #str = 'auto'
     dtype: str = 'auto'
     seed: int = 0
     max_model_len: Optional[int] = None
@@ -35,6 +35,7 @@ class EngineArgs:
     quantization: Optional[str] = None
     enforce_eager: bool = False
     max_context_len_to_capture: int = 8192
+    num_parallel_requests: int = 1
 
     def __post_init__(self):
         if self.tokenizer is None:
@@ -200,6 +201,10 @@ class EngineArgs:
                             help='maximum context length covered by CUDA '
                             'graphs. When a sequence has context length '
                             'larger than this, we fall back to eager mode.')
+        parser.add_argument('--num-parallel-requests',
+                            type=int,
+                            default=EngineArgs.num_parallel_requests,
+                            help='number of parallel requests to process')
         return parser
 
     @classmethod
@@ -227,7 +232,8 @@ class EngineArgs:
         parallel_config = ParallelConfig(self.pipeline_parallel_size,
                                          self.tensor_parallel_size,
                                          self.worker_use_ray,
-                                         self.max_parallel_loading_workers)
+                                         self.max_parallel_loading_workers, 
+                                         self.num_parallel_requests)
         scheduler_config = SchedulerConfig(self.max_num_batched_tokens,
                                            self.max_num_seqs,
                                            model_config.max_model_len,

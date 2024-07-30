@@ -71,6 +71,7 @@ def run_vllm(
     dtype: str,
     max_model_len: Optional[int],
     enforce_eager: bool,
+    num_parallel_requests: int,  #new add arg
 ) -> float:
     from vllm import LLM, SamplingParams
     llm = LLM(
@@ -83,6 +84,7 @@ def run_vllm(
         dtype=dtype,
         max_model_len=max_model_len,
         enforce_eager=enforce_eager,
+        num_parallel_requests=num_parallel_requests,
     )
 
     # Add the requests to the engine.
@@ -206,7 +208,7 @@ def main(args: argparse.Namespace):
                                 args.quantization, args.tensor_parallel_size,
                                 args.seed, args.n, args.use_beam_search,
                                 args.trust_remote_code, args.dtype,
-                                args.max_model_len, args.enforce_eager)
+                                args.max_model_len, args.enforce_eager, args.num_parallel_requests)
     elif args.backend == "hf":
         assert args.tensor_parallel_size == 1
         elapsed_time = run_hf(requests, args.model, tokenizer, args.n,
@@ -242,7 +244,7 @@ if __name__ == "__main__":
                         default=None,
                         help="Output length for each request. Overrides the "
                         "output length from the dataset.")
-    parser.add_argument("--model", type=str, default="facebook/opt-125m")
+    parser.add_argument("--model", type=str, default="/data1/home/zhb/program/llm/weight/llama2-7b-chat")
     parser.add_argument("--tokenizer", type=str, default=None)
     parser.add_argument('--quantization',
                         '-q',
@@ -284,6 +286,10 @@ if __name__ == "__main__":
     parser.add_argument("--enforce-eager",
                         action="store_true",
                         help="enforce eager execution")
+    parser.add_argument("--num-parallel-requests",
+                        type=int,
+                        default=1,
+                        help="Number of parallel requests to handle.")
     args = parser.parse_args()
     if args.tokenizer is None:
         args.tokenizer = args.model

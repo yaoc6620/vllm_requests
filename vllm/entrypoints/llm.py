@@ -81,9 +81,8 @@ class LLM:
         swap_space: int = 4,
         enforce_eager: bool = False,
         max_context_len_to_capture: int = 8192,
+        num_parallel_requests: int = 1,
         **kwargs,
-
-        # num_engines: int = 1, # 改了
     ) -> None:
         if "disable_log_stats" not in kwargs:
             kwargs["disable_log_stats"] = True
@@ -102,10 +101,11 @@ class LLM:
             swap_space=swap_space,
             enforce_eager=enforce_eager,
             max_context_len_to_capture=max_context_len_to_capture,
+            num_parallel_requests=num_parallel_requests,
             **kwargs,
         )
         #requestparallel
-        self.llm_engine = LLMEngine.from_engine_args(engine_args)
+        self.llm_engine = LLMEngine.from_engine_args(engine_args) #改了
         self.request_counter = Counter()
         # self.request_counter = iter(cycle(range(1000000))) #改了
 
@@ -192,11 +192,13 @@ class LLM:
         outputs: List[RequestOutput] = []
         while self.llm_engine.has_unfinished_requests():
             step_outputs = self.llm_engine.step()
+
             for output in step_outputs:
                 if output.finished:
                     outputs.append(output)
                     if use_tqdm:
                         pbar.update(1)
+            
         if use_tqdm:
             pbar.close()
         # Sort the outputs by request ID.

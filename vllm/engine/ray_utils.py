@@ -108,7 +108,7 @@ def initialize_cluster(
         # Create a new placement group
         current_placement_group = ray.util.placement_group([{
             "GPU": 1
-        }] * parallel_config.world_size)
+        }] * parallel_config.world_size) #修改
         # Wait until PG is ready - this will block until all
         # requested resources are available, and will timeout
         # if they cannot be provisioned.
