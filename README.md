@@ -23,7 +23,7 @@ In this project, we implemented request parallel reasoning. By setting the degre
     <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/yaoc6620/vllm_requests/requestPallel/vllm1.png?token=GHSAT0AAAAAACUMMYI7XVHGF2J336IO5X6MZVJ37HA">
     <img alt="vLLM" src="https://raw.githubusercontent.com/yaoc6620/vllm_requests/requestPallel/vllm1.png?token=GHSAT0AAAAAACUMMYI7XVHGF2J336IO5X6MZVJ37HA" width=70%>
   </picture>
-  <div style="height: 20px;"></div>
+  <div style="height: 40px;"></div>
 </p>
 <p align="center">
   <picture>
