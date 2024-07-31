@@ -14,4 +14,5 @@ Easy, fast, and cheap LLM serving for everyone
 
 </p>
 
-
+## Changes
+In this project, we implemented request parallel reasoning. By setting the degree of request parallelism, multiple schedulers can simultaneously schedule different requests to different workers to realize asynchronous execution reasoning, thus improving the computing throughput.You only need to set the num_parallel_requests parameter during LLM instantiation.
