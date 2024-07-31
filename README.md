@@ -19,7 +19,7 @@ In this project, we implemented request parallel reasoning. By setting the degre
 
 ## Design frame drawing
 <p align="center">
-  <picture style="display: inline-block; margin-right: 20px;">
+  <picture style="display: inline-block; margin-right: 40px;">
     <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/yaoc6620/vllm_requests/requestPallel/vllm1.png?token=GHSAT0AAAAAACUMMYI7XVHGF2J336IO5X6MZVJ37HA">
     <img alt="vLLM" src="https://raw.githubusercontent.com/yaoc6620/vllm_requests/requestPallel/vllm1.png?token=GHSAT0AAAAAACUMMYI7XVHGF2J336IO5X6MZVJ37HA" width=70%>
   </picture>
